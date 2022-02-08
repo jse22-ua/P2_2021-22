@@ -1,6 +1,7 @@
 // Programación 2 - Práctica 1
 // DNI: 74379872B
 // Nombre: Judit Serrano Espinosa
+//conseguido
 #include <iostream>
 #include <cstdlib> // Para rand(), srand() y atoi()
 
