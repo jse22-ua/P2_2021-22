@@ -3,6 +3,7 @@
 // Nombre: Judit Serrano Espinosa
 #include <iostream>
 #include <cstdlib> // Para rand(), srand() y atoi()
+#include <string.h> 
 
 using namespace std;
 
@@ -43,21 +44,40 @@ int rollDice(){
   return rand()%KDICE+1;
 }
 
-void askName (char name[]){//arreglar
+void askFeatures(int &attack, int &defense){
+  bool isRight;
+  float Attackporcien,Defenseporcien;
+  do{
+    isRight=true;
+    cout << "Enter attack/defense: ";
+    cin >> Attackporcien;
+    cin.get();
+    cin >> Defenseporcien;
+
+    if(Attackporcien==0||Defenseporcien==0 || Defenseporcien+Attackporcien!=100){
+      cout << "ERROR: wrong distribution" << endl;
+      isRight=false;
+    }
+    attack=(Attackporcien/100)*KPOINTS;
+    defense=(Defenseporcien/100)*KPOINTS;
+  }while(!isRight);
+}
+
+void askName (char name[]){
   bool IsRight;
 
   do{
     IsRight =true ;
     cout << "Enter hero name: ";
-    cin.getline(name,31);
+    cin.getline(name,KNAME-1);
     
-    for(int i=0;!IsRight&&i<(int)strlen(name);i++){
+    for(int i=0;IsRight&&i<(int)strlen(name);i++){
         if(!isalnum(name[i])){
             IsRight=false;
         }
     }
 
-    if(!IsRight || strlen(name)==0){
+    if(!IsRight || strlen(name)==0||name[0]==' '){
       cout << "ERROR: wrong name" << endl;
       IsRight=false;
     }
@@ -67,7 +87,10 @@ void askName (char name[]){//arreglar
 
 Hero createHero(){
   Hero myhero;
+
   askName(myhero.name);
+  askFeatures(myhero.features.attack, myhero.features.defense);
+
 }
 
 Enemy createEnemy(){
