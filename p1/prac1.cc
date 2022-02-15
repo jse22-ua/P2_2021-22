@@ -90,7 +90,16 @@ Hero createHero(){
 
   askName(myhero.name);
   askFeatures(myhero.features.attack, myhero.features.defense);
+  myhero.features.hp=myhero.features.defense*2;
+  myhero.special=true;
+  myhero.exp=0;
 
+  for(int i=0;i<KENEMIES;i++){
+
+    myhero.kills[i]=0;
+  }
+  
+  return myhero;
 }
 
 Enemy createEnemy(){
