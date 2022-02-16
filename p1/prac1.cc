@@ -47,14 +47,15 @@ int rollDice(){
 void askFeatures(int &attack, int &defense){
   bool isRight;
   float Attackporcien,Defenseporcien;
+  char slash;
   do{
     isRight=true;
     cout << "Enter attack/defense: ";
     cin >> Attackporcien;
-    cin.get();
+    slash=cin.get();
     cin >> Defenseporcien;
 
-    if(Attackporcien==0||Defenseporcien==0 || Defenseporcien+Attackporcien!=100){
+    if(Attackporcien==0||Defenseporcien==0 || Defenseporcien+Attackporcien!=100||slash!='/'){
       cout << "ERROR: wrong distribution" << endl;
       isRight=false;
     }
@@ -98,12 +99,59 @@ Hero createHero(){
 
     myhero.kills[i]=0;
   }
-  
+
   return myhero;
+}
+
+Breed AssignBreed(int dice){
+  Breed breed;
+  if(dice<=6){
+    breed=AXOLOTL;
+  }
+  else if(6<dice<=11){
+    breed=TROLL;
+  }
+  else if(11<dice<=15){
+    breed=ORC;
+  }
+  else if(15<dice<=18){
+    breed=HELLHOUND;
+  }
+  else{
+    breed=DRAGON;
+  }
+  return breed;
+}
+
+void GiveStatsEnemy(Enemy &enemy){
+  switch(enemy.name){
+    case AXOLOTL: enemy.features.attack=40;
+                  enemy.features.defense=40;
+                  break;
+    case TROLL: enemy.features.attack=60;
+                enemy.features.defense=80;
+                break;
+    case ORC: enemy.features.attack=80;
+              enemy.features.defense=120;
+              break;
+    case HELLHOUND: enemy.features.attack=120;
+                    enemy.features.defense=100;
+                    break;
+    default: enemy.features.attack=160;
+             enemy.features.defense=140;
+             break;
+  }
 }
 
 Enemy createEnemy(){
   int dice = rollDice();
+  Enemy myenemy;
+
+  myenemy.name=AssignBreed(dice);
+  GiveStatsEnemy(myenemy);
+  myenemy.features.hp=myenemy.features.defense*2;
+  
+  return myenemy;
 }
 
 void fight(Hero &hero,Enemy &enemy){
