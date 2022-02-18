@@ -44,7 +44,7 @@ int rollDice(){
   return rand()%KDICE+1;
 }
 
-void askFeatures(int &attack, int &defense){
+void askFeatures(int &attack, int &defense){//pide el ataque y la defensa por porcentajes
   bool isRight;
   float Attackporcien,Defenseporcien;
   char slash;
@@ -56,6 +56,7 @@ void askFeatures(int &attack, int &defense){
     cin >> Defenseporcien;
 
     if(Attackporcien==0||Defenseporcien==0 || Defenseporcien+Attackporcien!=100||slash!='/'){
+ 
       cout << "ERROR: wrong distribution" << endl;
       isRight=false;
     }
@@ -64,7 +65,7 @@ void askFeatures(int &attack, int &defense){
   }while(!isRight);
 }
 
-void askName (char name[]){
+void askName (char name[]){//pide el nombre del heroe y comprueba que sea correcto
   bool IsRight;
 
   do{
@@ -103,27 +104,32 @@ Hero createHero(){
   return myhero;
 }
 
-Breed AssignBreed(int dice){
+Breed AssignBreed(int dice, string &name){//Determina la raza según el valor del dado
   Breed breed;
   if(dice<=6){
     breed=AXOLOTL;
+    name="Axolotl";
   }
-  else if(6<dice<=11){
+  else if(6<dice&& dice<=11){
     breed=TROLL;
+    name="Troll";
   }
-  else if(11<dice<=15){
+  else if(11<dice&& dice<=15){
     breed=ORC;
+    name="Orc";
   }
-  else if(15<dice<=18){
+  else if(15<dice&& dice<=18){
     breed=HELLHOUND;
+    name="Hellhound";
   }
   else{
     breed=DRAGON;
+    name="Dragon";
   }
   return breed;
 }
 
-void GiveStatsEnemy(Enemy &enemy){
+void GiveStatsEnemy(Enemy &enemy){//Asigna el ataque y la defensa dependiendo de su raza
   switch(enemy.name){
     case AXOLOTL: enemy.features.attack=40;
                   enemy.features.defense=40;
@@ -143,13 +149,23 @@ void GiveStatsEnemy(Enemy &enemy){
   }
 }
 
+void printStatsEnemy(const Enemy &enemy, const string &breed){//Imprime las caracteristas del enemigo
+  cout << "[Enemy]" << endl;
+  cout << "Breed: " << breed << endl;
+  cout << "Attack: " << enemy.features.attack << endl;
+  cout << "Defense: " << enemy.features.defense << endl;
+  cout << "Health points: " << enemy.features.hp << endl;
+}
+
 Enemy createEnemy(){
   int dice = rollDice();
   Enemy myenemy;
+  string breed;
 
-  myenemy.name=AssignBreed(dice);
+  myenemy.name=AssignBreed(dice, breed);
   GiveStatsEnemy(myenemy);
   myenemy.features.hp=myenemy.features.defense*2;
+  printStatsEnemy(myenemy,breed);
   
   return myenemy;
 }
