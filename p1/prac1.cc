@@ -171,6 +171,7 @@ Enemy createEnemy(){
 }
 
 void fight(Hero &hero,Enemy &enemy){
+  
 }
 
 void report(const Hero &hero){
@@ -186,13 +187,41 @@ void showMenu(){
        << "Option: ";
 }
 
+void ChooseOption(Hero &hero, Enemy &enemy){
+  char option;
+
+  do{
+  showMenu();
+  cin >> option;
+  switch(option){
+    case '1': fight(hero, enemy);
+              break;
+    case '2': cout << "Run away" << endl;
+              break;
+    case '3': cout << "Special Attack" << endl;
+              break;
+    case '4': report(hero);
+              break;
+    case 'q': break;
+    default:  cout << "ERROR: wrong option";
+              break;
+  }
+  }while(option!='q'&&hero.features.hp!=0);
+}
+
 int main(int argc,char *argv[]){
   if(argc!=2){ // Si los parámetros no son correctos, el programa termina inmediatamente
     cout << "Usage: " << argv[0] << " <seed>" << endl;
   }
   else{    
     srand(atoi(argv[1])); // Introducimos la semilla para generar números aleatorios
-    
+    Hero myhero;
+    Enemy enemy;
+    myhero=createHero();
+    enemy=createEnemy();
+    ChooseOption(myhero, enemy);
+
+
     // Aquí vendrá todo tu código del "main"...
   }
 }
