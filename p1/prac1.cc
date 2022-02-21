@@ -55,13 +55,17 @@ void askFeatures(int &attack, int &defense){//pide el ataque y la defensa por po
     slash=cin.get();
     cin >> Defenseporcien;
 
+
     if(Attackporcien==0||Defenseporcien==0 || Defenseporcien+Attackporcien!=100||slash!='/'){
  
       cout << "ERROR: wrong distribution" << endl;
       isRight=false;
     }
+    else{
+
     attack=(Attackporcien/100)*KPOINTS;
     defense=(Defenseporcien/100)*KPOINTS;
+    }
   }while(!isRight);
 }
 
@@ -69,17 +73,17 @@ void askName (char name[]){//pide el nombre del heroe y comprueba que sea correc
   bool IsRight;
 
   do{
-    IsRight =true ;
+    IsRight =true;
     cout << "Enter hero name: ";
     cin.getline(name,KNAME-1);
     
     for(int i=0;IsRight&&i<(int)strlen(name);i++){
-        if(!isalnum(name[i])){
+        if(!isalnum(name[i])&&name[i]!=' '){
             IsRight=false;
         }
     }
 
-    if(!IsRight || strlen(name)==0||name[0]==' '){
+    if(!IsRight || strlen(name)==0||name[0]==' '||isdigit(name[0])){
       cout << "ERROR: wrong name" << endl;
       IsRight=false;
     }
@@ -104,49 +108,40 @@ Hero createHero(){
   return myhero;
 }
 
-Breed AssignBreed(int dice, string &name){//Determina la raza según el valor del dado
+Breed AssignBreed(int dice, string &name, Enemy &enemy){//Determina la raza según el valor del dado
   Breed breed;
   if(dice<=6){
     breed=AXOLOTL;
     name="Axolotl";
+    enemy.features.attack=40;
+    enemy.features.defense=40;
   }
   else if(6<dice&& dice<=11){
     breed=TROLL;
     name="Troll";
+    enemy.features.attack=60;
+    enemy.features.defense=80;
   }
   else if(11<dice&& dice<=15){
     breed=ORC;
     name="Orc";
+    enemy.features.attack=80;
+    enemy.features.defense=120;
+
   }
   else if(15<dice&& dice<=18){
     breed=HELLHOUND;
     name="Hellhound";
+    enemy.features.attack=120;
+    enemy.features.defense=100;
   }
   else{
     breed=DRAGON;
     name="Dragon";
+    enemy.features.attack=160;
+    enemy.features.defense=140;
   }
   return breed;
-}
-
-void GiveStatsEnemy(Enemy &enemy){//Asigna el ataque y la defensa dependiendo de su raza
-  switch(enemy.name){
-    case AXOLOTL: enemy.features.attack=40;
-                  enemy.features.defense=40;
-                  break;
-    case TROLL: enemy.features.attack=60;
-                enemy.features.defense=80;
-                break;
-    case ORC: enemy.features.attack=80;
-              enemy.features.defense=120;
-              break;
-    case HELLHOUND: enemy.features.attack=120;
-                    enemy.features.defense=100;
-                    break;
-    default: enemy.features.attack=160;
-             enemy.features.defense=140;
-             break;
-  }
 }
 
 void printStatsEnemy(const Enemy &enemy, const string &breed){//Imprime las caracteristas del enemigo
@@ -162,8 +157,7 @@ Enemy createEnemy(){
   Enemy myenemy;
   string breed;
 
-  myenemy.name=AssignBreed(dice, breed);
-  GiveStatsEnemy(myenemy);
+  myenemy.name=AssignBreed(dice, breed,myenemy);
   myenemy.features.hp=myenemy.features.defense*2;
   printStatsEnemy(myenemy,breed);
   
