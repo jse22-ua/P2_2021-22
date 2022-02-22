@@ -99,6 +99,7 @@ Hero createHero(){
   myhero.features.hp=myhero.features.defense*2;
   myhero.special=true;
   myhero.exp=0;
+  myhero.runaways=3;
 
   for(int i=0;i<KENEMIES;i++){
 
@@ -230,6 +231,19 @@ void fight(Hero &hero,Enemy &enemy){
 
 }
 
+void RunAway(int &numRunaway, bool &RanAway, Enemy &enemy){
+  if(RanAway||numRunaway==0){
+    cout << "ERROR: cannot run away";
+  }
+  else{
+    cout << "You run away" << endl;
+    RanAway=true;
+    numRunaway--;
+    enemy=createEnemy();
+
+  }
+}
+
 void report(const Hero &hero){
 }
 
@@ -245,16 +259,19 @@ void showMenu(){
 
 void ChooseOption(Hero &hero, Enemy &enemy){
   char option;
+  bool ranAway=false;
 
   do{
   showMenu();
   cin >> option;
   switch(option){
     case '1': fight(hero, enemy);
+              ranAway=false;
               break;
-    case '2': cout << "Run away" << endl;
+    case '2': RunAway(hero.runaways,ranAway,enemy);
               break;
     case '3': cout << "Special Attack" << endl;
+              ranAway=false;
               break;
     case '4': report(hero);
               break;
