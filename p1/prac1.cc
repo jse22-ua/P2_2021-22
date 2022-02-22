@@ -164,8 +164,70 @@ Enemy createEnemy(){
   return myenemy;
 }
 
+void calculateDamage(int attack, int defense, int &hp, string type){
+  int dice, totalAttack, totalDefense, hitPoint;
+
+  dice=rollDice();
+  cout << "Attack: " << attack << " + " << dice*5 << endl;
+  totalAttack=attack+dice*5;
+  dice=rollDice();
+  cout << "Defense: " << defense << " + " << dice*5 << endl;
+  totalDefense=defense+dice*5;
+
+  if(totalDefense>totalAttack){
+    hitPoint=0;
+  }
+  else{
+    hitPoint=totalAttack-totalDefense;
+  }
+
+  cout << "Hit points: " << hitPoint << endl;
+  if(hp<0){
+    hp=0;
+  }
+  cout << type  << " health points: " << hp << endl;
+}
+
+int AddExperience (Breed enemy){
+  int experience=0;
+  switch(enemy){
+    case AXOLOTL: experience= 100;
+                  break;
+    case TROLL: experience= 150;
+                break;
+    case ORC: experience= 200;
+              break;
+    case HELLHOUND: experience= 300;
+                    break;
+    case DRAGON: experience= 400;
+                 break;
+    default: cout  << "Error to introduce parameter";
+             break;
+  }
+  return experience;
+}
+
 void fight(Hero &hero,Enemy &enemy){
-  
+
+  cout << "[Hero -> Enemy]" << endl;
+  calculateDamage(hero.features.attack,enemy.features.defense,enemy.features.hp,"Enemy");
+
+  if(enemy.features.hp<=0){
+
+    cout << "Enemy killed" << endl;
+    hero.exp=hero.exp+AddExperience(enemy.name);
+    hero.kills[enemy.name]++;
+    enemy=createEnemy();
+
+  }
+  else{
+    cout << "[Enemy -> Hero]" << endl;
+    calculateDamage(enemy.features.attack,hero.features.defense,hero.features.hp,"Hero");
+    if(hero.features.hp<=0){
+      cout << "You are dead" << endl;
+    }
+  }
+
 }
 
 void report(const Hero &hero){
