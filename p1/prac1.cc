@@ -165,10 +165,13 @@ Enemy createEnemy(){
   return myenemy;
 }
 
-void calculateDamage(int attack, int defense, int &hp, string type){
+void calculateDamage(int attack, int defense, int &hp, string type,bool special){
   int dice, totalAttack, totalDefense, hitPoint;
 
   dice=rollDice();
+  if(special){
+    dice=dice*3;
+  }
   cout << "Attack: " << attack << " + " << dice*5 << endl;
   totalAttack=attack+dice*5;
   dice=rollDice();
@@ -183,8 +186,9 @@ void calculateDamage(int attack, int defense, int &hp, string type){
   }
 
   cout << "Hit points: " << hitPoint << endl;
+  hp=hp-hitPoint;
   if(hp<0){
-    hp=0;
+      hp=0;
   }
   cout << type  << " health points: " << hp << endl;
 }
@@ -211,7 +215,7 @@ int AddExperience (Breed enemy){
 void fight(Hero &hero,Enemy &enemy){
 
   cout << "[Hero -> Enemy]" << endl;
-  calculateDamage(hero.features.attack,enemy.features.defense,enemy.features.hp,"Enemy");
+  calculateDamage(hero.features.attack,enemy.features.defense,enemy.features.hp,"Enemy",false);
 
   if(enemy.features.hp<=0){
 
@@ -223,7 +227,7 @@ void fight(Hero &hero,Enemy &enemy){
   }
   else{
     cout << "[Enemy -> Hero]" << endl;
-    calculateDamage(enemy.features.attack,hero.features.defense,hero.features.hp,"Hero");
+    calculateDamage(enemy.features.attack,hero.features.defense,hero.features.hp,"Hero",false);
     if(hero.features.hp<=0){
       cout << "You are dead" << endl;
     }
@@ -244,7 +248,64 @@ void RunAway(int &numRunaway, bool &RanAway, Enemy &enemy){
   }
 }
 
+void Special (Hero &hero, Enemy &enemy){
+  if(!hero.special){
+    cout << "ERROR: special not avaible" << endl;
+  }
+  else{
+    hero.special=false;
+    cout << "[Hero -> Enemy]" << endl;
+    calculateDamage(hero.features.attack,enemy.features.defense,enemy.features.hp,"Enemy",true);
+
+    if(enemy.features.hp<=0){
+
+      cout << "Enemy killed" << endl;
+      hero.exp=hero.exp+AddExperience(enemy.name);
+      hero.kills[enemy.name]++;
+      enemy=createEnemy();
+
+    }
+    else{
+      cout << "[Enemy -> Hero]" << endl;
+      calculateDamage(enemy.features.attack,hero.features.defense,hero.features.hp,"Hero",false);
+      if(hero.features.hp<=0){
+        cout << "You are dead" << endl;
+      }
+    }
+  }
+}
+
+void PrintenemysDied(const int kills[]){
+  int total=0;
+  cout << "Enemy killed: " << endl;
+  cout << "- Axolotl: " << kills[0] << endl;
+  cout << "- Troll: " << kills[1] << endl;
+  cout << "- Orc: " << kills[2] << endl;
+  cout << "- Hellhound: " << kills[3] << endl;
+  cout << "- Dragon: " << kills[4] << endl;
+
+  for(int i=0;i<5;i++){
+    total=total+kills[i];
+  }
+  cout << "Total: " << total << endl;
+}
+
 void report(const Hero &hero){
+  cout << "[Report]" << endl;
+  cout << "Name: " << hero.name << endl;
+  cout << "Attack: " << hero.features.attack << endl;
+  cout << "Defense: " << hero.features.defense << endl;
+  cout << "Health points: " << hero.features.hp << endl;
+  cout << "Special: ";
+  if(hero.special){
+    cout <<"yes" << endl;
+  }
+  else{
+    cout << "no" << endl;
+  }
+  cout << "Runaways: " << hero.runaways << endl;
+  cout << "Exp: " << hero.exp << endl;
+
 }
 
 void showMenu(){
@@ -262,23 +323,23 @@ void ChooseOption(Hero &hero, Enemy &enemy){
   bool ranAway=false;
 
   do{
-  showMenu();
-  cin >> option;
-  switch(option){
-    case '1': fight(hero, enemy);
-              ranAway=false;
-              break;
-    case '2': RunAway(hero.runaways,ranAway,enemy);
-              break;
-    case '3': cout << "Special Attack" << endl;
-              ranAway=false;
-              break;
-    case '4': report(hero);
-              break;
-    case 'q': break;
-    default:  cout << "ERROR: wrong option";
-              break;
-  }
+    showMenu();
+    cin >> option;
+    switch(option){
+      case '1': fight(hero, enemy);
+               ranAway=false;
+                break;
+      case '2': RunAway(hero.runaways,ranAway,enemy);
+                break;
+      case '3': Special(hero,enemy);
+                ranAway=false;
+                break;
+      case '4': report(hero);
+                break;
+      case 'q':break;
+      default:  cout << "ERROR: wrong option";
+                break;
+    }
   }while(option!='q'&&hero.features.hp!=0);
 }
 
