@@ -46,7 +46,7 @@ int rollDice(){
 
 void askFeatures(int &attack, int &defense){//pide el ataque y la defensa por porcentajes
   bool isRight;
-  float Attackporcien,Defenseporcien;
+  float Attackporcien,Defenseporcien;//Los porcentajes se guardarán estas variables
   char slash;
   do{
     isRight=true;
@@ -63,8 +63,8 @@ void askFeatures(int &attack, int &defense){//pide el ataque y la defensa por po
     }
     else{
 
-    attack=(Attackporcien/100)*KPOINTS;
-    defense=(Defenseporcien/100)*KPOINTS;
+    attack=(Attackporcien/100)*KPOINTS;//una vez comprobado calcula el ataque
+    defense=(Defenseporcien/100)*KPOINTS;//y la defensa
     }
   }while(!isRight);
 }
@@ -94,10 +94,10 @@ void askName (char name[]){//pide el nombre del heroe y comprueba que sea correc
 Hero createHero(){
   Hero myhero;
 
-  askName(myhero.name);
-  askFeatures(myhero.features.attack, myhero.features.defense);
-  myhero.features.hp=myhero.features.defense*2;
-  myhero.special=true;
+  askName(myhero.name);//llama a la funcion que pide el nombre
+  askFeatures(myhero.features.attack, myhero.features.defense);//llama a la funcion que pide la defensa y el ataque
+  myhero.features.hp=myhero.features.defense*2;//calcula los puntos de vida
+  myhero.special=true;//inicializa el resto de elementos de el struct hero
   myhero.exp=0;
   myhero.runaways=3;
 
@@ -153,7 +153,7 @@ void printStatsEnemy(const Enemy &enemy, const string &breed){//Imprime las cara
   cout << "Health points: " << enemy.features.hp << endl;
 }
 
-Enemy createEnemy(){
+Enemy createEnemy(){//llama a los anteriores 
   int dice = rollDice();
   Enemy myenemy;
   string breed;
@@ -165,7 +165,7 @@ Enemy createEnemy(){
   return myenemy;
 }
 
-void calculateDamage(int attack, int defense, int &hp, string type,bool special){
+void calculateDamage(int attack, int defense, int &hp, string type,bool special){//calcula el daño hecho por cualquier cosa a cualquier cosa
   int dice, totalAttack, totalDefense, hitPoint;
 
   dice=rollDice();
@@ -212,10 +212,10 @@ int AddExperience (Breed enemy){
   return experience;
 }
 
-void fight(Hero &hero,Enemy &enemy){
+void fight(Hero &hero,Enemy &enemy, bool special){
 
   cout << "[Hero -> Enemy]" << endl;
-  calculateDamage(hero.features.attack,enemy.features.defense,enemy.features.hp,"Enemy",false);
+  calculateDamage(hero.features.attack,enemy.features.defense,enemy.features.hp,"Enemy",special);
 
   if(enemy.features.hp<=0){
 
@@ -250,34 +250,17 @@ void RunAway(int &numRunaway, bool &RanAway, Enemy &enemy){
 
 void Special (Hero &hero, Enemy &enemy){
   if(!hero.special){
-    cout << "ERROR: special not avaible" << endl;
+    cout << "ERROR: special not available" << endl;
   }
   else{
+    fight(hero,enemy,true);
     hero.special=false;
-    cout << "[Hero -> Enemy]" << endl;
-    calculateDamage(hero.features.attack,enemy.features.defense,enemy.features.hp,"Enemy",true);
-
-    if(enemy.features.hp<=0){
-
-      cout << "Enemy killed" << endl;
-      hero.exp=hero.exp+AddExperience(enemy.name);
-      hero.kills[enemy.name]++;
-      enemy=createEnemy();
-
-    }
-    else{
-      cout << "[Enemy -> Hero]" << endl;
-      calculateDamage(enemy.features.attack,hero.features.defense,hero.features.hp,"Hero",false);
-      if(hero.features.hp<=0){
-        cout << "You are dead" << endl;
-      }
-    }
   }
 }
 
 void PrintenemysDied(const int kills[]){
   int total=0;
-  cout << "Enemy killed: " << endl;
+  cout << "Enemies killed: " << endl;
   cout << "- Axolotl: " << kills[0] << endl;
   cout << "- Troll: " << kills[1] << endl;
   cout << "- Orc: " << kills[2] << endl;
@@ -305,6 +288,7 @@ void report(const Hero &hero){
   }
   cout << "Runaways: " << hero.runaways << endl;
   cout << "Exp: " << hero.exp << endl;
+  PrintenemysDied(hero.kills);
 
 }
 
@@ -326,7 +310,7 @@ void ChooseOption(Hero &hero, Enemy &enemy){
     showMenu();
     cin >> option;
     switch(option){
-      case '1': fight(hero, enemy);
+      case '1': fight(hero, enemy,false);
                ranAway=false;
                 break;
       case '2': RunAway(hero.runaways,ranAway,enemy);
@@ -354,6 +338,9 @@ int main(int argc,char *argv[]){
     myhero=createHero();
     enemy=createEnemy();
     ChooseOption(myhero, enemy);
+    if(myhero.features.hp==0){
+      report(myhero);
+    }
 
 
     // Aquí vendrá todo tu código del "main"...
