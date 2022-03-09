@@ -89,9 +89,27 @@ void showMainMenu() {
 }
 
 void showCatalog(const BookStore &bookStore) {
+  if(bookStore.books.size()!=0){
+    for(int i=0;i<(int)bookStore.books.size();i++){
+       cout << bookStore.books[i].id << ". ";
+       cout << bookStore.books[i].title;
+       cout << " (" << bookStore.books[i].year << "), ";
+       cout << bookStore.books[i].price << endl;
+    }
+  }
 }
 
 void showExtendedCatalog(const BookStore &bookStore) {
+  if(bookStore.books.size()!=0){
+    for(int i=0; i<(int)bookStore.books.size();i++){
+      cout << "\"" << bookStore.books[i].title << "\",";
+      cout << "\"" << bookStore.books[i].authors << "\",";
+      cout << bookStore.books[i].year << ",";
+      cout << "\"" << bookStore.books[i].slug << "\",";
+      cout << bookStore.books[i].price << "," << endl;
+
+    }
+  }
 }
 
 void addBook(BookStore &bookStore) {
