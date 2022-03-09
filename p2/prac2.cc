@@ -112,7 +112,39 @@ void showExtendedCatalog(const BookStore &bookStore) {
   }
 }
 
+void askName(string name,bool title){
+  bool right;
+  name="";
+  do{
+    right=true;
+    if(title){
+      cout << "Enter book title" << endl;
+    }
+    else{
+      cout << "Enter author(s):" << endl;
+    }
+    getline(cin,name);
+
+    for(int i=0;i<(int)name.length();i++){
+      if(!isalnum(name[i])&&name[i]!=' '&&name[i]!=':'&&name[i]!=','&&name[i]!='-'){
+        if(title){
+          error(ERR_BOOK_TITLE);
+        }
+        else{
+          error(ERR_BOOK_AUTHORS);
+        }
+        right=false;
+      }
+    }
+  }while(!right);
+}
+
 void addBook(BookStore &bookStore) {
+  Book book;
+  
+  askName(book.title,true);
+  askName(book.authors,false);
+
 }
 
 void deleteBook(BookStore &bookStore) {
