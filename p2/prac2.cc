@@ -3,6 +3,8 @@
 // Nombre: Judit Serrano Espinosa
 #include <iostream>
 #include <vector>
+#include <string.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -88,7 +90,7 @@ void showMainMenu() {
        << "Option: ";
 }
 
-void showCatalog(const BookStore &bookStore) {
+void showCatalog(const BookStore &bookStore) {//muestra los libros que hay dentro de la bookStore
   if(bookStore.books.size()!=0){
     for(int i=0;i<(int)bookStore.books.size();i++){
        cout << bookStore.books[i].id << ". ";
@@ -99,52 +101,128 @@ void showCatalog(const BookStore &bookStore) {
   }
 }
 
-void showExtendedCatalog(const BookStore &bookStore) {
+void showExtendedCatalog(const BookStore &bookStore) {//hace lo mismo que showCatalog pero mas detalladamente
   if(bookStore.books.size()!=0){
     for(int i=0; i<(int)bookStore.books.size();i++){
       cout << "\"" << bookStore.books[i].title << "\",";
       cout << "\"" << bookStore.books[i].authors << "\",";
       cout << bookStore.books[i].year << ",";
       cout << "\"" << bookStore.books[i].slug << "\",";
-      cout << bookStore.books[i].price << "," << endl;
+      cout << bookStore.books[i].price << endl;
 
     }
   }
 }
 
-void askName(string name,bool title){
+bool stringIsRight(string &name){//Comprueba si el nombre del autor o del titulo es correcto y devuelve true si lo  es
   bool right;
-  name="";
-  do{
     right=true;
-    if(title){
-      cout << "Enter book title" << endl;
-    }
-    else{
-      cout << "Enter author(s):" << endl;
-    }
     getline(cin,name);
 
-    for(int i=0;i<(int)name.length();i++){
-      if(!isalnum(name[i])&&name[i]!=' '&&name[i]!=':'&&name[i]!=','&&name[i]!='-'){
-        if(title){
-          error(ERR_BOOK_TITLE);
+    if(name.length()==0){
+      right=false;
+    }
+    else{
+      for(int i=0;i<(int)name.length();i++){
+        if(!isalnum(name[i])&&name[i]!=' '&&name[i]!=':'&&name[i]!=','&&name[i]!='-'){
+          right=false;
         }
-        else{
-          error(ERR_BOOK_AUTHORS);
-        }
+      }
+    }
+    return right;
+}
+
+void askName(string &name, const string &message, Error e){
+    bool right;
+  
+  do{
+    cout << message;//pide que introduzca el titulo o el autor dependiendo del mensaje pasado por parametro
+    right=stringIsRight(name);//comprueba si es correcta
+
+    if(!right){//si no lo es
+      error(e);// lanza el error pedido por parametro
+    }
+  }while(!right);//y vuelve a pedirlo hasta que sea correcta
+}
+
+void askyearPublication(int &year){//pide año y comprobar si es correcto
+  string stringyear;
+  bool right;
+  do{
+    right=true;
+    cout << "Enter publication year:";
+    getline(cin,stringyear);
+
+    if(stringyear.length()==0){//Comprueba que el usuario ha metido algo
+      error(ERR_BOOK_DATE);
+      right=false;
+    }
+    else{
+      year=atoi(stringyear.c_str());
+      if(year<1440 || year>2020){//comprueba si esta entre 1440 y 2022 
+        error(ERR_BOOK_DATE);//si no es correcto el año lanza el error
         right=false;
       }
     }
-  }while(!right);
+  }while(!right);//y vuelve a pedirlo
+
+}
+
+void setprice(float &price){//pide el precio y comprueba si es correcto
+  string stringprice;
+  bool wrong;
+
+  do{
+    wrong=false;
+    cout << "Enter price:";
+    getline(cin,stringprice);
+
+    if(stringprice.length()==0){//si el usuario no ha introducido nada
+      error(ERR_BOOK_PRICE);//lanza un error
+      wrong=true;
+    }
+    else{
+      price=atof(stringprice.c_str());
+
+      if(price<=0){//o si es menor o igual que 0
+        wrong=true;
+        error(ERR_BOOK_PRICE);//lanza un error
+      }
+    }
+  }while(wrong);//vuelve a pedir el precio al usuario
+}
+
+string generateSlug(string title){
+  string slug;
+  bool guion;
+
+  for(int i=0; i<(int)title.length();i++){
+    if(isalnum(title[i])){
+      guion=false;
+      slug +=  tolower(title[i]);
+    }
+    else if(i==(int)title.length()-1){}
+    else if(!guion){
+      guion=true;
+      slug += '-';
+    }
+  }
+  return slug;
 }
 
 void addBook(BookStore &bookStore) {
   Book book;
   
-  askName(book.title,true);
-  askName(book.authors,false);
+  askName(book.title,"Enter book title:",ERR_BOOK_TITLE);//pide el titulo y comprueba si es correcto
+  askName(book.authors,"Enter author(s):",ERR_BOOK_AUTHORS);//pide el autor y comprueba si es correcto
+  askyearPublication(book.year);//pide el año de publicacion y comprueba si es correcto
+  setprice(book.price);//pide el precio y si es menor o igual a 0 o cadena vacia lanza un error
+  book.slug=generateSlug(book.title);
 
+  book.id=bookStore.nextId;
+  bookStore.nextId++;
+
+  bookStore.books.push_back(book);
 }
 
 void deleteBook(BookStore &bookStore) {
