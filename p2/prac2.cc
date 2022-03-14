@@ -109,7 +109,6 @@ void showExtendedCatalog(const BookStore &bookStore) {//hace lo mismo que showCa
       cout << bookStore.books[i].year << ",";
       cout << "\"" << bookStore.books[i].slug << "\",";
       cout << bookStore.books[i].price << endl;
-
     }
   }
 }
@@ -150,7 +149,7 @@ void askyearPublication(int &year){//pide año y comprobar si es correcto
   bool right;
   do{
     right=true;
-    cout << "Enter publication year:";
+    cout << "Enter publication year: ";
     getline(cin,stringyear);
 
     if(stringyear.length()==0){//Comprueba que el usuario ha metido algo
@@ -174,7 +173,7 @@ void setprice(float &price){//pide el precio y comprueba si es correcto
 
   do{
     wrong=false;
-    cout << "Enter price:";
+    cout << "Enter price: ";
     getline(cin,stringprice);
 
     if(stringprice.length()==0){//si el usuario no ha introducido nada
@@ -192,17 +191,21 @@ void setprice(float &price){//pide el precio y comprueba si es correcto
   }while(wrong);//vuelve a pedir el precio al usuario
 }
 
-string generateSlug(string title){
+string generateSlug(string title){//crea el slug a partir del title
   string slug;
-  bool guion;
+  bool guion;//comprueba si se ha puesto guion en la posicion anterior
 
   for(int i=0; i<(int)title.length();i++){
-    if(isalnum(title[i])){
+    if(isalnum(title[i])){//si es un numero o una letra
       guion=false;
-      slug +=  tolower(title[i]);
+      slug +=  tolower(title[i]);//lo añade a slug en minuscula
     }
-    else if(i==(int)title.length()-1){}
-    else if(!guion){
+    else if(i==(int)title.length()-1){
+      /*si la ultima posicion tiene algo que no sea
+      *un numero o una letra no añade nada
+      */
+    }
+    else if(!guion){//si no la posicion anterior no tiene guion pone un guion
       guion=true;
       slug += '-';
     }
@@ -213,8 +216,8 @@ string generateSlug(string title){
 void addBook(BookStore &bookStore) {
   Book book;
   
-  askName(book.title,"Enter book title:",ERR_BOOK_TITLE);//pide el titulo y comprueba si es correcto
-  askName(book.authors,"Enter author(s):",ERR_BOOK_AUTHORS);//pide el autor y comprueba si es correcto
+  askName(book.title,"Enter book title: ",ERR_BOOK_TITLE);//pide el titulo y comprueba si es correcto
+  askName(book.authors,"Enter author(s): ",ERR_BOOK_AUTHORS);//pide el autor y comprueba si es correcto
   askyearPublication(book.year);//pide el año de publicacion y comprueba si es correcto
   setprice(book.price);//pide el precio y si es menor o igual a 0 o cadena vacia lanza un error
   book.slug=generateSlug(book.title);
@@ -226,6 +229,29 @@ void addBook(BookStore &bookStore) {
 }
 
 void deleteBook(BookStore &bookStore) {
+  int id = 0;
+  bool found = false;
+
+  cout << "Enter book id: ";
+  cin >> id;
+
+  if(bookStore.books.size() == 0 || id == 0){//comprueba si el vector esta vacio o si no ha introducido nada el usuario
+    error(ERR_ID);//lanza error
+  }
+  else if(id > (int)bookStore.books[bookStore.books.size()-1].id || id < 0){//comprueba si id > el id del ultimo libro almacenado
+    error(ERR_ID);//lanza error
+  }
+  else{
+    for(int i = 0; i < (int)bookStore.books.size()&&!found; i++){
+      if(id == (int)bookStore.books[i].id){
+        bookStore.books.erase(bookStore.books.begin()+i);
+        found = true;
+      }
+    }
+    if(!found){
+      error(ERR_ID);
+    }
+  }
 }
 
 void importExportMenu(BookStore &bookStore) {
