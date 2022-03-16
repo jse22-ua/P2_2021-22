@@ -3,8 +3,8 @@
 // Nombre: Judit Serrano Espinosa
 #include <iostream>
 #include <vector>
-#include <string.h>
 #include <stdlib.h>
+#include <fstream>
 
 using namespace std;
 
@@ -158,7 +158,7 @@ void askyearPublication(int &year){//pide año y comprobar si es correcto
     }
     else{
       year=atoi(stringyear.c_str());
-      if(year<1440 || year>2020){//comprueba si esta entre 1440 y 2022 
+      if(year<1440 || year>2022){//comprueba si esta entre 1440 y 2022 
         error(ERR_BOOK_DATE);//si no es correcto el año lanza el error
         right=false;
       }
@@ -254,10 +254,33 @@ void deleteBook(BookStore &bookStore) {
   }
 }
 
-void importExportMenu(BookStore &bookStore) {
+void showMenuExportImport(){
+  cout << "[Import/export options]" << endl;
+  cout << "1- Import from CSV" << endl;
+  cout << "2- Export to CSV" << endl;
+  cout << "3- Load data" << endl;
+  cout << "4- Save data" << endl;
+  cout << "b- Back to main menu" << endl;
+  cout << "Option: ";
 }
 
 void importFromCsv(BookStore &bookStore){
+  ifstream file;
+  char namefile[30];
+
+  cout << "Enter filename:";
+  cin.getline(namefile,30);
+
+  file.open(namefile);
+
+  if(file.is_open()){
+    
+    file.close();
+  }
+  else{
+    error(ERR_FILE);
+
+  }
 }
 
 void exportToCsv(const BookStore &bookStore){
@@ -267,6 +290,37 @@ void loadData(BookStore &bookStore){
 }
 
 void saveData(const BookStore &bookStore){
+}
+
+void importExportMenu(BookStore &bookStore) {
+  char option;
+
+  do{
+    showMenuExportImport();
+    cin >> option;
+     cin.get();
+
+    switch(option){
+      case '1':
+        importFromCsv(bookStore);
+        break;
+      case '2':
+        exportToCsv(bookStore);
+        break;
+      case '3':
+       loadData(bookStore);
+       break;
+      case '4':
+        saveData(bookStore);
+        break;
+      case 'b':
+        break;
+      default:
+        error(ERR_OPTION);
+        break; 
+    }
+
+  }while(option != 'b');
 }
 
 int main(int argc, char *argv[]) {
