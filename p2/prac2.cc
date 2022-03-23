@@ -5,6 +5,8 @@
 #include <vector>
 #include <stdlib.h>
 #include <fstream>
+#include <ctype.h>
+#include <sstream>
 
 using namespace std;
 
@@ -229,27 +231,31 @@ void addBook(BookStore &bookStore) {
 }
 
 void deleteBook(BookStore &bookStore) {
+  string stringid;
   int id = 0;
   bool found = false;
 
   cout << "Enter book id: ";
-  cin >> id;
+  getline(cin,stringid);
 
-  if(bookStore.books.size() == 0 || id == 0){//comprueba si el vector esta vacio o si no ha introducido nada el usuario
+  if(bookStore.books.size() == 0 || stringid.length() == 0){//comprueba si el vector esta vacio o si no ha introducido nada el usuario
     error(ERR_ID);//lanza error
   }
-  else if(id > (int)bookStore.books[bookStore.books.size()-1].id || id < 0){//comprueba si id > el id del ultimo libro almacenado
+  else{ 
+    id=atoi(stringid.c_str());
+    if(id < 0){//comprueba si id > el id del ultimo libro almacenado
     error(ERR_ID);//lanza error
-  }
-  else{
-    for(int i = 0; i < (int)bookStore.books.size()&&!found; i++){
-      if(id == (int)bookStore.books[i].id){
-        bookStore.books.erase(bookStore.books.begin()+i);
-        found = true;
-      }
     }
-    if(!found){
-      error(ERR_ID);
+    else{
+      for(int i = 0; i < (int)bookStore.books.size()&&!found; i++){
+        if(id == (int)bookStore.books[i].id){
+          bookStore.books.erase(bookStore.books.begin()+i);
+          found = true;
+        }
+      }
+      if(!found){
+        error(ERR_ID);
+      }
     }
   }
 }
@@ -264,17 +270,36 @@ void showMenuExportImport(){
   cout << "Option: ";
 }
 
+void addbookofFile(string &bookdetails){
+  Book book;
+  string year,price;
+  stringstream ss(bookdetails);
+
+  ss.get();
+  getline(ss,book.title,'\"');
+  ss.get();
+  ss.get();
+  getline(ss,book.authors,'\"');
+  ss.get();
+  getline(ss,year,',');
+  getline(ss,book.slug,',');
+  getline(ss,price);
+}
+
 void importFromCsv(BookStore &bookStore){
   ifstream file;
   char namefile[30];
+  string bookdetails;
 
   cout << "Enter filename:";
-  cin.getline(namefile,30);
+  cin.getline(namefile,100);
 
   file.open(namefile);
 
   if(file.is_open()){
-    
+    while(getline(file,bookdetails)){
+
+    }
     file.close();
   }
   else{
