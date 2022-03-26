@@ -118,7 +118,6 @@ void showExtendedCatalog(const BookStore &bookStore) {//hace lo mismo que showCa
 bool stringIsRight(string &name){//Comprueba si el nombre del autor o del titulo es correcto y devuelve true si lo  es
   bool right;
     right=true;
-    getline(cin,name);
 
     if(name.length()==0){
       right=false;
@@ -138,6 +137,7 @@ void askName(string &name, const string &message, Error e){
   
   do{
     cout << message;//pide que introduzca el titulo o el autor dependiendo del mensaje pasado por parametro
+    getline(cin,name);
     right=stringIsRight(name);//comprueba si es correcta
 
     if(!right){//si no lo es
@@ -270,7 +270,30 @@ void showMenuExportImport(){
   cout << "Option: ";
 }
 
-void addbookofFile(string &bookdetails){
+bool checkbook(Book book){
+  bool right=true;
+
+  if(!stringIsRight(book.title)){
+    right=false;
+    error(ERR_BOOK_TITLE);
+  }
+  if(!stringIsRight(book.authors)){
+    right=false;
+    error(ERR_BOOK_AUTHORS);
+  }
+  if(book.year<1440||book.year>2022){
+    right=false;
+    error(ERR_BOOK_DATE);
+  }
+  if(book.price<=0){
+    right=false;
+    error(ERR_BOOK_PRICE);
+  }
+
+  return right;
+}
+
+void addbookofFile(string &bookdetails,BookStore &bookstore){
   Book book;
   string year,price;
   stringstream ss(bookdetails);
@@ -282,23 +305,32 @@ void addbookofFile(string &bookdetails){
   getline(ss,book.authors,'\"');
   ss.get();
   getline(ss,year,',');
+  book.year=atoi(year.c_str());
   getline(ss,book.slug,',');
+  book.slug=book.slug.substr(1,book.slug.length()-2);
   getline(ss,price);
+  book.price=atof(price.c_str());
+
+  if(checkbook(book)){
+    book.id=bookstore.nextId;
+    bookstore.nextId++;
+    bookstore.books.push_back(book);
+  }
 }
 
 void importFromCsv(BookStore &bookStore){
   ifstream file;
-  char namefile[30];
+  char namefile[100];
   string bookdetails;
 
-  cout << "Enter filename:";
+  cout << "Enter filename: ";
   cin.getline(namefile,100);
 
   file.open(namefile);
 
   if(file.is_open()){
     while(getline(file,bookdetails)){
-
+      addbookofFile(bookdetails,bookStore);
     }
     file.close();
   }
