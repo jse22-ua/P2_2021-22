@@ -270,8 +270,8 @@ void showMenuExportImport(){
   cout << "Option: ";
 }
 
-bool checkbook(Book book){
-  bool right=true;
+bool checkbook(Book book){ //encarga de gestionar todos los errores del libro 
+  bool right=true;//devuelve true si todo está correcto
 
   if(!stringIsRight(book.title)){
     right=false;
@@ -293,57 +293,125 @@ bool checkbook(Book book){
   return right;
 }
 
-void addbookofFile(string &bookdetails,BookStore &bookstore){
+void addbookofFile(string &bookdetails,BookStore &bookstore){//se encarga de separar el string en las partes del libro
   Book book;
   string year,price;
   stringstream ss(bookdetails);
 
   ss.get();
   getline(ss,book.title,'\"');
-  ss.get();
-  ss.get();
+  ss.get();//lee la coma seguida del titulo
+  ss.get();//lee la comilla al principio del autor
   getline(ss,book.authors,'\"');
-  ss.get();
-  getline(ss,year,',');
-  book.year=atoi(year.c_str());
-  getline(ss,book.slug,',');
-  book.slug=book.slug.substr(1,book.slug.length()-2);
-  getline(ss,price);
-  book.price=atof(price.c_str());
 
-  if(checkbook(book)){
+  ss.get();//lee la coma delante del año
+  getline(ss,year,',');
+  book.year=atoi(year.c_str());//convierte el año a int
+
+  getline(ss,book.slug,',');
+  book.slug=book.slug.substr(1,book.slug.length()-2);//quita las comillas
+
+  getline(ss,price);
+  book.price=atof(price.c_str());//convierte el precio a float
+
+  if(checkbook(book)){//añade al vector de libros si los componentes son correctos
     book.id=bookstore.nextId;
     bookstore.nextId++;
     bookstore.books.push_back(book);
   }
 }
 
-void importFromCsv(BookStore &bookStore){
-  ifstream file;
-  char namefile[100];
+void importFromCsv(BookStore &bookStore){//lee un fichero de texto y añade los libros leidos si son correctos
+  ifstream fileRead;
+  char namefile[KMAXSTRING];
   string bookdetails;
 
   cout << "Enter filename: ";
-  cin.getline(namefile,100);
+  cin.getline(namefile,KMAXSTRING-1);
 
-  file.open(namefile);
+  fileRead.open(namefile);
 
-  if(file.is_open()){
-    while(getline(file,bookdetails)){
-      addbookofFile(bookdetails,bookStore);
+  if(fileRead.is_open()){
+    while(getline(fileRead,bookdetails)){//lee linea a linea cada libro
+      addbookofFile(bookdetails,bookStore);//añade el libros si estan bien
     }
-    file.close();
+    fileRead.close();
   }
   else{
-    error(ERR_FILE);
+    error(ERR_FILE);//si no se abre el fichero lanza un error
 
   }
 }
 
 void exportToCsv(const BookStore &bookStore){
+  ofstream filewrite;
+  char filename[KMAXSTRING];
+
+  cout << "Enter filename: ";
+  cin.getline(filename,KMAXSTRING);
+
+  filewrite.open(filename);
+
+  if(filewrite.is_open()){
+    if(bookStore.books.size()!=0){
+      for(int i=0; i<(int)bookStore.books.size();i++){
+        filewrite << "\"" << bookStore.books[i].title << "\",";
+        filewrite << "\"" << bookStore.books[i].authors << "\",";
+        filewrite << bookStore.books[i].year << ",";
+        filewrite << "\"" << bookStore.books[i].slug << "\",";
+        filewrite << bookStore.books[i].price << endl;
+      }
+    }
+
+    filewrite.close();
+  }
+  else{
+    error(ERR_FILE);
+  }
+
+}
+
+Book AddBinaryBook(BinBook binBook){
+  Book book;
+
+  return book;
 }
 
 void loadData(BookStore &bookStore){
+  BinBookStore binStore;
+  BinBook binBooks;
+  ifstream fileBinRead;
+  char option;
+  char namefile[KMAXSTRING];
+
+  do{
+    cout << "All data will be erased, do you want to continue (Y/N)?: " << endl;
+    cin >> option;
+
+    if(option=='Y' || option=='y'){
+      cout << "Enter filename: ";
+      cin.getline(namefile,KMAXSTRING);
+
+      fileBinRead.open(namefile, ios::in | ios::binary);
+
+      if(fileBinRead.is_open()){
+        bookStore.books.clear();
+
+        while(fileBinRead.read((char*)&binStore,sizeof(BinBookStore))){
+          bookStore.name=binStore.name;
+          bookStore.nextId=binStore.nextId;
+        }
+        while(fileBinRead.read((char*)&binBooks,sizeof(BinBook))){
+          
+        }
+        fileBinRead.close();
+      }
+      else{
+        error(ERR_FILE);
+      }
+    }
+
+  }while(option!='Y' && option!='y' && option!='N'&& option!='n');
 }
 
 void saveData(const BookStore &bookStore){
