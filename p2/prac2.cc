@@ -306,13 +306,23 @@ void addbookofFile(string &bookdetails,BookStore &bookstore){//se encarga de sep
 
   ss.get();//lee la coma delante del año
   getline(ss,year,',');
-  book.year=atoi(year.c_str());//convierte el año a int
+  if(year.length()!=0){
+    book.year=atoi(year.c_str());//convierte el año a int
+  }
+  else{
+    book.year=-1;
+  }
 
   getline(ss,book.slug,',');
   book.slug=book.slug.substr(1,book.slug.length()-2);//quita las comillas
 
   getline(ss,price);
-  book.price=atof(price.c_str());//convierte el precio a float
+  if(price.length()!=0){
+    book.price=atof(price.c_str());//convierte el precio a float
+  }
+  else{
+    book.price=-2;
+  }
 
   if(checkbook(book)){//añade al vector de libros si los componentes son correctos
     book.id=bookstore.nextId;
@@ -374,6 +384,13 @@ void exportToCsv(const BookStore &bookStore){
 Book AddBinaryBook(BinBook binBook){
   Book book;
 
+  book.id=binBook.id;
+  book.title=binBook.title;
+  book.authors=binBook.authors;
+  book.year=binBook.year;
+  book.slug=binBook.slug;
+  book.price=binBook.price;
+
   return book;
 }
 
@@ -385,24 +402,25 @@ void loadData(BookStore &bookStore){
   char namefile[KMAXSTRING];
 
   do{
-    cout << "All data will be erased, do you want to continue (Y/N)?: " << endl;
+    cout << "All data will be erased, do you want to continue (Y/N)?: ";
     cin >> option;
 
     if(option=='Y' || option=='y'){
       cout << "Enter filename: ";
-      cin.getline(namefile,KMAXSTRING);
+      cin >> namefile;
 
-      fileBinRead.open(namefile, ios::in | ios::binary);
+      fileBinRead.open(namefile, ios::binary);
 
       if(fileBinRead.is_open()){
         bookStore.books.clear();
 
-        while(fileBinRead.read((char*)&binStore,sizeof(BinBookStore))){
-          bookStore.name=binStore.name;
-          bookStore.nextId=binStore.nextId;
-        }
+        fileBinRead.read((char*)&binStore,sizeof(BinBookStore));
+        bookStore.name=binStore.name;
+        bookStore.nextId=binStore.nextId;
+
+        fileBinRead.seekg((1)*sizeof(BinBookStore),ios::beg);
         while(fileBinRead.read((char*)&binBooks,sizeof(BinBook))){
-          
+          bookStore.books.push_back(AddBinaryBook(binBooks));
         }
         fileBinRead.close();
       }
@@ -415,6 +433,7 @@ void loadData(BookStore &bookStore){
 }
 
 void saveData(const BookStore &bookStore){
+  
 }
 
 void importExportMenu(BookStore &bookStore) {
