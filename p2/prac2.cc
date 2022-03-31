@@ -7,6 +7,7 @@
 #include <fstream>
 #include <ctype.h>
 #include <sstream>
+#include <string.h>
 
 using namespace std;
 
@@ -331,15 +332,10 @@ void addbookofFile(string &bookdetails,BookStore &bookstore){//se encarga de sep
   }
 }
 
-void importFromCsv(BookStore &bookStore){//lee un fichero de texto y añade los libros leidos si son correctos
+void readTextfile(BookStore &bookStore, char name[],bool &open){//lee un fichero de texto y añade los libros leidos si son correctos
   ifstream fileRead;
-  char namefile[KMAXSTRING];
   string bookdetails;
-
-  cout << "Enter filename: ";
-  cin.getline(namefile,KMAXSTRING-1);
-
-  fileRead.open(namefile);
+  fileRead.open(name);
 
   if(fileRead.is_open()){
     while(getline(fileRead,bookdetails)){//lee linea a linea cada libro
@@ -349,11 +345,25 @@ void importFromCsv(BookStore &bookStore){//lee un fichero de texto y añade los 
   }
   else{
     error(ERR_FILE);//si no se abre el fichero lanza un error
+    open=false;
 
   }
 }
 
-void exportToCsv(const BookStore &bookStore){
+void importFromCsv(BookStore &bookStore){
+  char namefile[KMAXSTRING];
+  bool open=true;
+ 
+
+  cout << "Enter filename: ";
+  cin.getline(namefile,KMAXSTRING-1);
+
+  readTextfile(bookStore,namefile,open);
+
+  
+}
+
+void exportToCsv(const BookStore &bookStore){//se encaga de guardar los datos de bookStore en un fichero de texto
   ofstream filewrite;
   char filename[KMAXSTRING];
 
@@ -381,8 +391,8 @@ void exportToCsv(const BookStore &bookStore){
 
 }
 
-Book AddBinaryBook(BinBook binBook){
-  Book book;
+Book RealBook(BinBook binBook){//convierte de binBook (lo leido dentro del fichero binario)
+  Book book;//en libro para poder guardarlo en el vector de libros
 
   book.id=binBook.id;
   book.title=binBook.title;
@@ -394,10 +404,35 @@ Book AddBinaryBook(BinBook binBook){
   return book;
 }
 
-void loadData(BookStore &bookStore){
+void readBinaryfile(char name[],bool &open,BookStore &bookStore){//lee un fichero binario y añade a la lista de libros
   BinBookStore binStore;
   BinBook binBooks;
   ifstream fileBinRead;
+
+   fileBinRead.open(name, ios::binary);
+
+      if(fileBinRead.is_open()){
+        bookStore.books.clear();
+
+        fileBinRead.read((char*)&binStore,sizeof(BinBookStore));
+        bookStore.name = binStore.name;
+        bookStore.nextId = binStore.nextId;
+
+        fileBinRead.seekg((1)*sizeof(BinBookStore),ios::beg);
+        while(fileBinRead.read((char*)&binBooks,sizeof(BinBook))){
+          bookStore.books.push_back(RealBook(binBooks));
+        }
+        fileBinRead.close();
+      }
+      else{
+        error(ERR_FILE);
+        open = false;
+      }
+
+}
+
+void loadData(BookStore &bookStore){//se asegura de borrar todo y pide el nombre del fichero a leer al usuario 
+  bool right=true;
   char option;
   char namefile[KMAXSTRING];
 
@@ -405,38 +440,82 @@ void loadData(BookStore &bookStore){
     cout << "All data will be erased, do you want to continue (Y/N)?: ";
     cin >> option;
 
-    if(option=='Y' || option=='y'){
+    if(option == 'Y' || option == 'y'){
       cout << "Enter filename: ";
       cin >> namefile;
-
-      fileBinRead.open(namefile, ios::binary);
-
-      if(fileBinRead.is_open()){
-        bookStore.books.clear();
-
-        fileBinRead.read((char*)&binStore,sizeof(BinBookStore));
-        bookStore.name=binStore.name;
-        bookStore.nextId=binStore.nextId;
-
-        fileBinRead.seekg((1)*sizeof(BinBookStore),ios::beg);
-        while(fileBinRead.read((char*)&binBooks,sizeof(BinBook))){
-          bookStore.books.push_back(AddBinaryBook(binBooks));
-        }
-        fileBinRead.close();
-      }
-      else{
-        error(ERR_FILE);
-      }
+      readBinaryfile(namefile,right,bookStore);
     }
 
   }while(option!='Y' && option!='y' && option!='N'&& option!='n');
 }
 
-void saveData(const BookStore &bookStore){
-  
+void moreKMAXSTRING(string name, char charname[]){//se asegura de guarda en array de caracteres un string
+  string sub;
+    if(name.length()>KMAXSTRING-1){//si el tamaño del string es mayor
+      sub=name.substr(0,KMAXSTRING-1);
+      strcpy(charname,sub.c_str());//guarda solo hasta el tamaño del array de caracteres
+    }
+    else{
+      strcpy(charname,name.c_str());
+    }
 }
 
-void importExportMenu(BookStore &bookStore) {
+BinBook BinaryBook(const Book &book){//convierte de libro a binbook
+  BinBook binbook;
+
+  binbook.id=book.id;
+  binbook.price=book.price;
+  binbook.year=book.year;
+  moreKMAXSTRING(book.title,binbook.title);
+  moreKMAXSTRING(book.authors,binbook.authors);
+  moreKMAXSTRING(book.slug,binbook.slug);
+
+  return binbook;
+}
+
+void saveData(const BookStore &bookStore){//escribe un fichero binario con los datos de bookStore
+  ofstream filebinWrite;
+  BinBook Binbook;
+  BinBookStore Binstore;
+  char filename[KMAXSTRING];
+  string name;
+
+  cout << "Enter filename: ";
+  cin >> filename;
+
+  filebinWrite.open(filename, ios::binary);
+
+  if(filebinWrite.is_open()){
+    if(bookStore.name.length()>KMAXSTRING-1){
+      name=bookStore.name.substr(0,KMAXSTRING-1);
+      strcpy(Binstore.name,name.c_str());
+    }
+    else{
+      strcpy(Binstore.name,bookStore.name.c_str());
+    }
+    Binstore.nextId=bookStore.nextId;
+
+    filebinWrite.write((const char *)&Binstore,sizeof(BinBookStore));
+    filebinWrite.seekp((1)*sizeof(BinBookStore),ios::beg);
+
+    if(bookStore.books.size()!=0){
+      for(int i=0;i<(int)bookStore.books.size();i++){
+
+        Binbook=BinaryBook(bookStore.books[i]);
+
+        filebinWrite.write((const char*)&Binbook,sizeof(BinBook));
+      }
+    }
+
+    filebinWrite.close();
+  }
+  else{
+    error(ERR_FILE);
+  }
+
+}
+
+void importExportMenu(BookStore &bookStore) {//muestra el menu y da elegir 
   char option;
 
   do{
@@ -468,38 +547,72 @@ void importExportMenu(BookStore &bookStore) {
 }
 
 int main(int argc, char *argv[]) {
+
   BookStore bookStore;
   bookStore.name = "My Book Store";
   bookStore.nextId = 1;
-
+  bool binary=true,text=true;
   char option;
-  do {
-    showMainMenu();
-    cin >> option;
-    cin.get();
 
-    switch (option) {
-      case '1':
-        showCatalog(bookStore);
-        break;
-      case '2':
-        showExtendedCatalog(bookStore);
-        break;
-      case '3':
-        addBook(bookStore);
-        break;
-      case '4':
-        deleteBook(bookStore);
-        break;
-      case '5':
-        importExportMenu(bookStore);
-        break;
-      case 'q':
-        break;
-      default:
-        error(ERR_OPTION);
+  if(argc==3){
+    if(strcmp(argv[1],"-l")==0){
+      readBinaryfile(argv[2],binary,bookStore);
     }
-  } while (option != 'q');
+    else if(strcmp(argv[1],"-i")==0){
+      readTextfile(bookStore,argv[2],text);
+    }else{
+      error(ERR_ARGS);
+    }
+  }
+  else if(argc==5){
+    if(strcmp(argv[1],"-i")==0 && strcmp(argv[4],"-l")==0){
+      readBinaryfile(argv[5],binary,bookStore);
+      readTextfile(bookStore,argv[2],text);
+    }
+    else if(strcmp(argv[1],"-l")==0&& strcmp(argv[4],"-i")==0){
+      readBinaryfile(argv[2],binary,bookStore);
+      readTextfile(bookStore,argv[5],text);
+    }
+    else{
+      error(ERR_ARGS);
+    }
+  }
+  else if(argc==1){}
 
+  else{
+    error(ERR_ARGS);
+    binary=false;
+    text=false;
+  }
+  if(binary && text){
+    do {
+      showMainMenu();
+      cin >> option;
+      cin.get();
+
+      switch (option) {
+        case '1':
+          showCatalog(bookStore);
+          break;
+        case '2':
+          showExtendedCatalog(bookStore);
+          break;
+        case '3':
+          addBook(bookStore);
+          break;
+        case '4':
+          deleteBook(bookStore);
+          break;
+        case '5':
+          importExportMenu(bookStore);
+          break;
+        case 'q':
+          break;
+        default:
+          error(ERR_OPTION);
+      }
+    } while (option != 'q');
+
+  }
   return 0;
 }
