@@ -13,14 +13,6 @@ Coordinate::Coordinate(int row,int column){
     this->column=column;
 }
 
-int Coordinate::getRow() const{
-    return row;
-}
-
-int Coordinate::getColumn() const{
-    return column;
-}
-
 void Coordinate::setRow(int row){
     this->row=row;
 }

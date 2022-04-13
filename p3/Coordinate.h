@@ -11,8 +11,8 @@ class Coordinate{
     public:
         Coordinate();
         Coordinate(int row,int column);
-        int getRow() const;
-        int getColumn() const;
+        int getRow() const{return row;}
+        int getColumn() const{return column;}
         void setRow(int row);
         void setColumn(int column);
         bool compare(const Coordinate& coord);
