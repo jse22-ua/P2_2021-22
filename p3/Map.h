@@ -18,7 +18,7 @@ class  Map{
         void putJunk(const Junk &junk,const Coordinate &coord);
         Junk getJunk(const Coordinate &coord) const;
         Junk collectJunk(const Coordinate &coord);
-        friend ostream& operator<<(ostream &os, Map &map);
+        friend ostream& operator<<(ostream &os, const Map &map);
 };
 
 #endif

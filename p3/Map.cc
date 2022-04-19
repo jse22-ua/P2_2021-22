@@ -12,16 +12,16 @@ Map::Map(int rows,int columns){
     }
     this->rows=rows;
     this->columns=columns;
-    for(int i=0;i<rows;i++){
+    for(int i=0;i<columns;i++){
         wastes.push_back(waste);
     }
-    for(int i=0;i<columns;i++){
+    for(int i=0;i<rows;i++){
         junks.push_back(wastes);
     }
 }
 
 bool Map::isInside(const Coordinate &coord) const{
-    if(coord.getColumn()<columns&&coord.getRow()<rows){
+    if(coord.getColumn()<columns&&coord.getRow()<rows&&coord.getColumn()>=0&&coord.getRow()>=0){
         return true;
     }
     else{
@@ -31,7 +31,7 @@ bool Map::isInside(const Coordinate &coord) const{
 
 void Map::putJunk(const Junk &junk,const Coordinate &coord){
     if(isInside(coord)){
-        junks[coord.getColumn()][coord.getRow()]=junk;
+        junks[coord.getRow()][coord.getColumn()]=junk;
     }
     else{
         throw EXCEPTION_OUTSIDE;
@@ -40,7 +40,7 @@ void Map::putJunk(const Junk &junk,const Coordinate &coord){
 
 Junk Map::getJunk(const Coordinate &coord) const{
     if(isInside(coord)){
-        return junks[coord.getColumn()][coord.getRow()];
+        return junks[coord.getRow()][coord.getColumn()];
     }
     else{
         throw EXCEPTION_OUTSIDE;
@@ -53,12 +53,34 @@ Junk Map::collectJunk(const Coordinate &coord){
         throw EXCEPTION_OUTSIDE;
     }
     else{
-        junk=junks[coord.getColumn()][coord.getRow()];
-        junks[coord.getColumn()][coord.getRow()]=waste;
+        junk=junks[coord.getRow()][coord.getColumn()];
+        junks[coord.getRow()][coord.getColumn()]=waste;
         return junk;
     }
 }
 
 ostream& operator<<(ostream &os,const Map &map){
-    
+    for(int i=0;i<map.columns;i++){
+        if(i<10){
+            os << "0";
+        }
+        os<< i << " ";
+    }
+    os << endl;
+    for(int i=0;i<map.rows;i++){
+        if(i<10){
+            os << "0";
+        }
+        os << i << " ";
+        for(int j=0;j<map.columns;j++){
+            if(map.getJunk(Coordinate(i,j)).getTypeChar()=='W'){
+                os << " ";
+            }
+            else{
+                os << map.getJunk(Coordinate(i,j)).getTypeChar();
+            }
+            os << " ";
+        }
+        os << endl;
+    }
 }

@@ -15,7 +15,7 @@ class Coordinate{
         int getColumn() const{return column;}
         void setRow(int row);
         void setColumn(int column);
-        bool compare(const Coordinate& coord);
+        bool compare(const Coordinate &coord)const;
         friend ostream& operator<<(ostream &os,const Coordinate& coord);
 };
 

@@ -16,6 +16,52 @@ Junk::Junk(JunkType type, int quantity){
     this->quantity=quantity;
 }
 
+char Junk::getTypeChar() const{
+    switch (type){
+        case WASTELAND:
+            return 'W';
+            break;
+        case GOLD:
+            return 'G';
+            break;
+        case METAL:
+            return 'M';
+            break;
+        case FOOD:
+            return 'F';
+            break;
+        case STONE:
+            return 'S';
+            break;
+        default:
+            break;
+    }
+}
+
+int Junk::getValue() const{
+    int value;
+
+    switch (type){
+        case WASTELAND:
+            value=0;
+            break;
+        case GOLD:
+            value=500;
+            break;
+        case METAL:
+            value=100;
+            break;
+        case FOOD:
+            value=50;
+            break;
+        case STONE:
+            value=20;
+            break;
+        default:
+            break;
+    }
+    return value*quantity;
+}
 
 ostream& operator<<(ostream &os,const Junk &junk){
     string name;
@@ -35,6 +81,8 @@ ostream& operator<<(ostream &os,const Junk &junk){
             break;
         case STONE:
             name="STONE";
+            break;
+        default:
             break;
     }
 
