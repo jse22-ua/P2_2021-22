@@ -83,4 +83,5 @@ ostream& operator<<(ostream &os,const Map &map){
         }
         os << endl;
     }
+    return os;
 }

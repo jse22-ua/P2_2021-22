@@ -87,6 +87,7 @@ ostream& operator<<(ostream &os,const Junk &junk){
     }
 
     os << "[" << name << ":" << junk.quantity <<"]";
+    return os;
 
 }
 
