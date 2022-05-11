@@ -14,7 +14,7 @@ Jankali::Jankali(string name){
 }
 
 void Jankali::hunt(vector<Betonski *> betonskis){
-    if(traps.size()!=0||betonskis.size()!=0){
+    if(traps.size()!=0&&betonskis.size()!=0){
 
         for(int i=0;i<(int)betonskis.size();i++){
 
@@ -37,16 +37,18 @@ bool Jankali::setTrap(const Coordinate &coord){
    bool positioned=false;
    bool setTrap=false;
 
-   for(int i=0;i<(int)traps.size();i++){
-       if(coord.compare(traps[i])){
-           positioned=true;
-           break;
-       }
-   } 
+    if(traps.size()!=0){
+        for(int i=0;i<(int)traps.size();i++){
+            if(coord.compare(traps[i])){
+                positioned=true;
+                break;
+            }
+        }
+    } 
    if(!positioned){
         charge=(coord.getColumn()+2)*(coord.getRow() + 2);
 
-        if(charge>=power){
+        if(power>=charge){
             power-=charge;
             traps.push_back(coord);
             setTrap=true;
@@ -56,22 +58,26 @@ bool Jankali::setTrap(const Coordinate &coord){
 }
 
 void Jankali::spoil(){
-    for(int i=0;i<(int)subdued.size();i++){
-        try{
-            power+=subdued[i]->spoliation();
-        }catch(...){
-            subdued.erase(subdued.begin()+i);
+    if(subdued.size()==0){
+        for(int i=0;i<(int)subdued.size();i++){
+            try{
+                power+=subdued[i]->spoliation();
+            }catch(...){
+                subdued.erase(subdued.begin()+i);
+            }
         }
 
     }
 }
 
 void Jankali::spoil(JunkType type){
+    if(subdued.size()==0){
         for(int i=0;i<(int)subdued.size();i++){
-        try{
-            power+=subdued[i]->spoliation(type);
-        }catch(...){
-            subdued.erase(subdued.begin()+i);
+            try{
+                power+=subdued[i]->spoliation(type);
+            }catch(...){
+                subdued.erase(subdued.begin()+i);
+            }
         }
 
     }
@@ -90,9 +96,17 @@ void Jankali::spoil(int pos){
 ostream& operator<<(ostream &os, const Jankali &jankali){
     os << "Jankali \"" << jankali.name << "\" " << jankali.power << endl;
 
-    for(int i=0;i<(int)jankali.subdued.size();i++){
-        os << jankali.subdued[i];
-        //terminar
+    if(jankali.subdued.size()!=0){
+        for(int i=0;i<(int)jankali.subdued.size();i++){
+            os << *jankali.subdued[i];
+        }
+    }
+    if(jankali.traps.size()!=0){
+        os << "Traps ";
+        for(int j=0;j<(int)jankali.traps.size();j++){
+            os << jankali.traps[j];
+        }
+        os << endl;
     }
     return os;
 }

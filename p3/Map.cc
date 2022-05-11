@@ -1,3 +1,4 @@
+//Judit Serrano Espinosa 74379872B
 #include <iostream>
 #include <vector>
 #include "Map.h"
@@ -60,6 +61,7 @@ Junk Map::collectJunk(const Coordinate &coord){
 }
 
 ostream& operator<<(ostream &os,const Map &map){
+    os << "   ";
     for(int i=0;i<map.columns;i++){
         if(i<10){
             os << "0";
@@ -74,10 +76,11 @@ ostream& operator<<(ostream &os,const Map &map){
         os << i << " ";
         for(int j=0;j<map.columns;j++){
             if(map.getJunk(Coordinate(i,j)).getTypeChar()=='W'){
-                os << " ";
+                os << "  ";
             }
             else{
                 os << map.getJunk(Coordinate(i,j)).getTypeChar();
+                os << " ";
             }
             os << " ";
         }

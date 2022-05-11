@@ -1,3 +1,4 @@
+//Judit Serrano Espinosa 74379872B
 #include <iostream>
 #include "Junk.h"
 
@@ -17,25 +18,27 @@ Junk::Junk(JunkType type, int quantity){
 }
 
 char Junk::getTypeChar() const{
+    char letter='0';
     switch (type){
         case WASTELAND:
-            return 'W';
+            letter= 'W';
             break;
         case GOLD:
-            return 'G';
+            letter='G';
             break;
         case METAL:
-            return 'M';
+            letter='M';
             break;
         case FOOD:
-            return 'F';
+            letter= 'F';
             break;
         case STONE:
-            return 'S';
+            letter = 'S';
             break;
         default:
             break;
     }
+    return letter;
 }
 
 int Junk::getValue() const{

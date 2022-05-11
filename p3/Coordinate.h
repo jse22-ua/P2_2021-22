@@ -1,3 +1,4 @@
+//Judit Serrano Espinosa, 74379872B
 #ifndef _Coordinate_H
 #define _Coordinate_H
 #include <iostream>
